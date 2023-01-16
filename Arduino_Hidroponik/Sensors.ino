@@ -3,15 +3,15 @@
 #include <DallasTemperature.h>
 #include "Pins.h"
 
-#define SENS_TDS_SAMPLE_INTERVAL  503
-#define SENS_TDS_FILTER_KF        8
-#define SENS_PH_SAMPLE_INTERVAL   308
-#define SENS_PH_FILTER_KF         6
-#define SENS_TEMP_SAMPLE_INTERVAL 1007
-#define SENS_TEMP_FILTER_KF       3
+#define SENS_TDS_SAMPLE_INTERVAL  503         // TDS Sensor Sampling Interval (ms)
+#define SENS_TDS_FILTER_KF        8           // TDS Sensor Filter Coefficient
+#define SENS_PH_SAMPLE_INTERVAL   308         // PH Sensor Sampling Interval (ms)
+#define SENS_PH_FILTER_KF         6           // PH Sensor Filter Coefficient
+#define SENS_TEMP_SAMPLE_INTERVAL 1007        // Temp. Sensor Sampling Interval (ms)
+#define SENS_TEMP_FILTER_KF       3           // Temp. Sensor Filter Coefficient
 
-#define SENS_PH_CAL_VALUE        0.013685
-#define SENS_PH_OFFS_VALUE       0
+#define SENS_PH_CAL_VALUE        0.013685     // PH Sensor Calibration Value (Scale Factor)
+#define SENS_PH_OFFS_VALUE       0            // PH Sensor Offset Value
 
 GravityTDS tds;
 OneWire oneWire(SENS_Temp_PIN);
@@ -26,13 +26,16 @@ float sens_temp_filtValue;
 uint16_t sens_ph_filtValue;
 
 void Sensor_Init(){
+  // Initialization
   pinMode(SENS_PH_PIN, INPUT);
 
+  // Temp. Sensor Init.
   temp.begin();
   temp.requestTemperatures();
   temp.setWaitForConversion(false);
   sens_temp_filtValue = temp.getTempCByIndex(0);
 
+  // TDS Sensor Init.
   tds.setPin(SENS_TDS_PIN);
   tds.setAref(5.0); 
   tds.setAdcRange(1024);  
@@ -45,6 +48,7 @@ void Sensor_Init(){
 }
 
 void Sensor_Handler(){
+  // Sensor Sampling & Filtering Handler
   if(millis() - sens_tds_timer >= SENS_TDS_SAMPLE_INTERVAL){
     sens_tds_filtValue = ((sens_tds_filtValue * SENS_TDS_FILTER_KF) + tds.getTdsValue()) / (SENS_TDS_FILTER_KF + 1);
     tds.update();
@@ -53,7 +57,7 @@ void Sensor_Handler(){
   }
 
   if(millis() - sens_ph_timer >= SENS_PH_SAMPLE_INTERVAL){
-    sens_ph_filtValue = ((sens_ph_filtValue * SENS_PH_FILTER_KF) + analogRead(SENS_PH_PIN)) / (SENS_PH_FILTER_KF + 1);
+    sens_ph_filtValue = ((sens_ph_filtValue * SENS_PH_FILTER_KF) + (1023 - analogRead(SENS_PH_PIN))) / (SENS_PH_FILTER_KF + 1);
 
     sens_ph_timer = millis();
   }
