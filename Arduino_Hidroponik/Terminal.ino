@@ -13,10 +13,25 @@ void Terminal_Init(){
   Serial.println(" Convetech 2022 ");
   Serial.println("================");
   Serial.println();
+
+  // PLX-DAQ Initialization
+  Serial.println("CLEARDATA");
+  Serial.println("LABEL,Time,PH,TDS,Temp.");
 }
 
 void Terminal_Handler(){
   if(millis() - terminal_timer >= TERMINAL_TRANSMISSION_INTERVAL){
+    // PLX-DAQ Datastream
+    Serial.print("DATA,TIME");
+    Serial.print(Sens_PH_GetValue());
+    Serial.print(",");
+    Serial.print(Sens_TDS_GetValue());
+    Serial.print(",");
+    Serial.print(Sens_Temp_GetValue());
+    Serial.println();
+
+    // Default Terminal
+    /*
     Serial.print("PH: ");
     Serial.print(Sens_PH_GetValue());
     Serial.print("/");
@@ -32,6 +47,7 @@ void Terminal_Handler(){
     Serial.print(" P_MX: ");
     Serial.print(Pump_Mixer_GetState());
     Serial.println();
+    */
 
     terminal_timer = millis();
   }
