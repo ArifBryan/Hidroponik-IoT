@@ -6,12 +6,12 @@
 #define SENS_TDS_SAMPLE_INTERVAL  503         // TDS Sensor Sampling Interval (ms)
 #define SENS_TDS_FILTER_KF        8           // TDS Sensor Filter Coefficient
 #define SENS_PH_SAMPLE_INTERVAL   308         // PH Sensor Sampling Interval (ms)
-#define SENS_PH_FILTER_KF         6           // PH Sensor Filter Coefficient
+#define SENS_PH_FILTER_KF         8           // PH Sensor Filter Coefficient
 #define SENS_TEMP_SAMPLE_INTERVAL 1007        // Temp. Sensor Sampling Interval (ms)
 #define SENS_TEMP_FILTER_KF       3           // Temp. Sensor Filter Coefficient
 
-#define SENS_PH_CAL_VALUE        0.013685     // PH Sensor Calibration Value (Scale Factor)
-#define SENS_PH_OFFS_VALUE       0            // PH Sensor Offset Value
+#define SENS_PH_CAL_VALUE        0.045       // PH Sensor Calibration Value (Scale Factor)
+#define SENS_PH_OFFS_VALUE       150.0       // PH Sensor Offset Value
 
 GravityTDS tds;
 OneWire oneWire(SENS_Temp_PIN);
@@ -20,6 +20,7 @@ DallasTemperature temp(&oneWire);
 uint32_t sens_tds_timer;
 uint32_t sens_ph_timer;
 uint32_t sens_temp_timer;
+bool sens_ph_meas;
 
 float sens_tds_filtValue;
 float sens_temp_filtValue;
@@ -27,6 +28,7 @@ uint16_t sens_ph_filtValue;
 
 void Sensor_Init(){
   // Initialization
+  pinMode(SENS_TDS_EN, OUTPUT);
   pinMode(SENS_PH_PIN, INPUT);
 
   // Temp. Sensor Init.
@@ -50,15 +52,25 @@ void Sensor_Init(){
 void Sensor_Handler(){
   // Sensor Sampling & Filtering Handler
   if(millis() - sens_tds_timer >= SENS_TDS_SAMPLE_INTERVAL){
-    sens_tds_filtValue = ((sens_tds_filtValue * SENS_TDS_FILTER_KF) + tds.getTdsValue()) / (SENS_TDS_FILTER_KF + 1);
-    tds.update();
+    if(!sens_ph_meas){
+      sens_tds_filtValue = ((sens_tds_filtValue * SENS_TDS_FILTER_KF) + tds.getTdsValue()) / (SENS_TDS_FILTER_KF + 1);
+      tds.update();
+      digitalWrite(SENS_TDS_EN, LOW);
+      delay(25);
 
+      sens_ph_meas = 1;
+    }
     sens_tds_timer = millis();
   }
 
   if(millis() - sens_ph_timer >= SENS_PH_SAMPLE_INTERVAL){
-    sens_ph_filtValue = ((sens_ph_filtValue * SENS_PH_FILTER_KF) + (1023 - analogRead(SENS_PH_PIN))) / (SENS_PH_FILTER_KF + 1);
-
+    if(sens_ph_meas){
+      sens_ph_filtValue = ((sens_ph_filtValue * SENS_PH_FILTER_KF) + (1023 - analogRead(SENS_PH_PIN))) / (SENS_PH_FILTER_KF + 1);
+      
+      digitalWrite(SENS_TDS_EN, HIGH);
+      delay(1);
+      sens_ph_meas = 0;
+    }
     sens_ph_timer = millis();
   }
 

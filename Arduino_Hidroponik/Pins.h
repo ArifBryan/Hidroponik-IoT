@@ -1,5 +1,6 @@
 #pragma once
 
+#define SENS_TDS_EN   8
 #define SENS_TDS_PIN  A0
 #define SENS_PH_PIN   A1
 #define SENS_Temp_PIN A2
