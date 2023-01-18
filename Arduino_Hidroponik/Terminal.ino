@@ -22,7 +22,7 @@ void Terminal_Init(){
 void Terminal_Handler(){
   if(millis() - terminal_timer >= TERMINAL_TRANSMISSION_INTERVAL){
     // PLX-DAQ Datastream
-    Serial.print("DATA,TIME");
+    Serial.print("DATA,TIME,");
     Serial.print(Sens_PH_GetValue());
     Serial.print(",");
     Serial.print(Sens_TDS_GetValue());
