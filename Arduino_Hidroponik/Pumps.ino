@@ -4,7 +4,7 @@
 #define PUMP_PH_DOWN  RELAY_2_PIN
 #define PUMP_MIXER    RELAY_3_PIN
 
-#define PUMP_PH_TIME_MAX  1500
+#define PUMP_PH_TIME_MAX  5000
 
 uint32_t pump_ph_timer;
 uint32_t pump_ph_time;

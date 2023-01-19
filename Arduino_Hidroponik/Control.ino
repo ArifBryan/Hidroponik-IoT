@@ -1,4 +1,4 @@
-#define CONTROL_INTERVAL  10000
+#define CONTROL_INTERVAL  3000 // Default : 10000
 
 #define CONTROL_PH_GAIN   100
 
@@ -11,11 +11,15 @@ void Control_Handler(){
   if(millis() - control_timer >= CONTROL_INTERVAL){
     control_ph_error = control_ph_setpoint - Sens_PH_GetValue();
     if(control_ph_error < -control_ph_tolerance){
-      Pump_PH_Down_Dose(abs(control_ph_error * CONTROL_PH_GAIN));
+      // Override control gain
+      Pump_PH_Down_Dose(3000);
+      //Pump_PH_Down_Dose(abs(control_ph_error * CONTROL_PH_GAIN));
       Pump_Mixer_Enable();
     }
     else if(control_ph_error > control_ph_tolerance){
-      Pump_PH_Up_Dose(control_ph_error * CONTROL_PH_GAIN);
+      // Override control gain
+      Pump_PH_Up_Dose(3000);
+      //Pump_PH_Up_Dose(control_ph_error * CONTROL_PH_GAIN);
       Pump_Mixer_Enable();
     }
     else{
